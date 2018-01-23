@@ -3,12 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.thiastux.human_simulator.demo;
+package com.thiastux.human_simulator.dataanimator;
 
-import com.jme3.system.AppSettings;
-import com.thiastux.human_simulator.*;
-import com.thiastux.human_simulator.model.Stickman;
-import com.thiastux.human_simulator.model.Const;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.ChaseCamera;
 import com.jme3.light.AmbientLight;
@@ -26,6 +22,11 @@ import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.jme3.system.AppSettings;
+import com.thiastux.human_simulator.demo.TCPDataClient;
+import com.thiastux.human_simulator.model.Const;
+import com.thiastux.human_simulator.model.Stickman;
+
 import java.util.HashMap;
 
 /**
@@ -46,11 +47,10 @@ public class MainStickman extends SimpleApplication {
             app = new MainStickman(args);
         }
 
-
         app.start();
     }
 
-    private TCPDataClient tcpDataClient;
+    private DataReader dataReader;
     private Quaternion[] animationQuaternions;
     private HashMap<Integer, Spatial> skeletonMap = new HashMap<>();
     private Stickman stickman;
@@ -68,7 +68,7 @@ public class MainStickman extends SimpleApplication {
     }
 
     public MainStickman(String[] args) {
-        tcpDataClient = new TCPDataClient(this, args);
+        dataReader = new DataReader(this, args);
     }
 
     @Override
@@ -97,10 +97,6 @@ public class MainStickman extends SimpleApplication {
 
         computeInitialQuaternions();
 
-        if (!DEBUG) {
-            tcpDataClient.startExecution();
-        }
-
     }
 
     @Override
@@ -116,15 +112,12 @@ public class MainStickman extends SimpleApplication {
 
     @Override
     public void stop() {
-        if (!DEBUG) {
-            tcpDataClient.stopExecution();
-        }
         System.out.println("\nApplication ended");
         super.stop();
     }
 
     private void getData() {
-        animationQuaternions = tcpDataClient.getData();
+        animationQuaternions = dataReader.getData();
     }
 
     private void animateModel() {
@@ -272,7 +265,7 @@ public class MainStickman extends SimpleApplication {
         //Add light to the scene
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
-        sun.setDirection(new Vector3f(-.5f, -.5f, -.5f).normalizeLocal());
+        sun.setDirection(new Vector3f(.5f, -.5f, -.5f).normalizeLocal());
         rootNode.addLight(sun);
 
         DirectionalLight sun2 = new DirectionalLight();
