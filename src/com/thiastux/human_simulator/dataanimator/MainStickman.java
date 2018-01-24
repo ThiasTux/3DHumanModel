@@ -13,6 +13,7 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
@@ -23,32 +24,30 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
-import com.thiastux.human_simulator.demo.TCPDataClient;
 import com.thiastux.human_simulator.model.Const;
 import com.thiastux.human_simulator.model.Stickman;
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
+import de.lessvoid.nifty.elements.render.TextRenderer;
+import de.lessvoid.nifty.render.NiftyImage;
+import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 /**
- *
  * @author mathias
  */
-public class MainStickman extends SimpleApplication {
+public class MainStickman extends SimpleApplication implements ScreenController {
 
     private static boolean DEBUG = false;
-
-    public static void main(String[] args) {
-
-        MainStickman app;
-
-        if (DEBUG) {
-            app = new MainStickman();
-        } else {
-            app = new MainStickman(args);
-        }
-
-        app.start();
-    }
+    Element playedPanel;
+    Element remainingPanel;
+    Element playPanel;
+    int maxWidth;
 
     private DataReader dataReader;
     private Quaternion[] animationQuaternions;
@@ -62,13 +61,53 @@ public class MainStickman extends SimpleApplication {
     private Quaternion preRot;
     private Quaternion qAlignArmR;
     private Quaternion qAlignArmL;
-
-    public MainStickman() {
+    float percPlay;
+    //Running params
+    boolean isRunning = false;
+    long applicationStartTime;
+    long applicationEndTime;
+    Float startTime = 0f;
+    Float currentTime = 0f;
+    double animationSpeed = 1;
+    int speedIndex = 1;
+    double[] speedFactors = {0.5, 1, 2, 4, 8};
+    private TreeMap<Float, Quaternion[]> dataMap;
+    private int samplingFreq = 500;
+    private float elapsedTime = 0.0f;
+    //Gui and controls
+    private Nifty nifty;
+    private int animationIndex;
+    private int dataKeysetSize;
+    private MainStickman() {
         super();
     }
 
-    public MainStickman(String[] args) {
-        dataReader = new DataReader(this, args);
+    private MainStickman(String[] args) {
+        dataReader = new DataReader(args);
+        dataMap = dataReader.loadData();
+        dataKeysetSize = dataMap.keySet().size();
+    }
+
+    public static void main(String[] args) {
+
+        MainStickman app;
+
+        if (DEBUG) {
+            app = new MainStickman();
+        } else {
+            app = new MainStickman(args);
+        }
+
+        AppSettings appSettings = new AppSettings(true);
+        appSettings.setFrameRate(60);
+        appSettings.setResolution(1280,800);
+
+        app.setShowSettings(false);
+        app.setPauseOnLostFocus(false);
+        app.setSettings(appSettings);
+
+        app.start();
+
     }
 
     @Override
@@ -95,18 +134,23 @@ public class MainStickman extends SimpleApplication {
 
         setSunLightAndShadow();
 
+        loadInterface();
+
         computeInitialQuaternions();
+
+        isRunning = false;
 
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        boolean animStart = Const.animationStart;
-        if (animStart && !DEBUG) {
-            getData();
-            animateModel();
-        } else {
-            //stickman.animateBone(0, 0, true);
+        if (animationIndex == 0)
+            startTime = dataMap.firstKey();
+        if (isRunning) {
+            elapsedTime += (float) (animationSpeed * tpf);
+            if (elapsedTime >= (1 / samplingFreq))
+                animateModel(elapsedTime);
+            elapsedTime = .0f;
         }
     }
 
@@ -116,11 +160,38 @@ public class MainStickman extends SimpleApplication {
         super.stop();
     }
 
-    private void getData() {
-        animationQuaternions = dataReader.getData();
+    private void animateModel(float tmpElapsedTime) {
+
+        if (animationIndex < dataKeysetSize - 1) {
+
+            currentTime = startTime + tmpElapsedTime;
+
+            float lastKey = dataMap.subMap(startTime, currentTime).lastKey();
+            if (lastKey != startTime) {
+
+                int size = dataMap.subMap(startTime, currentTime).size();
+                animationIndex += size;
+
+                int perc = maxWidth * animationIndex / dataKeysetSize;
+                System.out.println(perc);
+                playedPanel.setWidth(perc);
+
+                animationQuaternions = dataMap.get(lastKey);
+                updateModel();
+                startTime = lastKey;
+            }
+
+        } else {
+            animationIndex = 0;
+            elapsedTime = .0f;
+            play();
+            playedPanel.setWidth(0);
+            stickman.resetPositions();
+        }
     }
 
-    private void animateModel() {
+
+    private void updateModel() {
         for (int i = 0; i < 12; i++) {
             Quaternion rotQuat = preProcessingQuaternion(i);
             if (rotQuat != null) {
@@ -146,16 +217,34 @@ public class MainStickman extends SimpleApplication {
                 outputQuat.getZ(),
                 outputQuat.getY(),
                 outputQuat.getW());
-        
+
         previousQuaternions[i] = outputQuat.normalizeLocal();
-        
+
         outputQuat = conjugate(getPrevLimbQuaternion(i)).mult(outputQuat);
 
         outputQuat = outputQuat.normalizeLocal();
 
         return outputQuat;
     }
-    
+
+    private void loadInterface() {
+        //Load and add GUI as overlay on the scene
+        NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager,
+                inputManager,
+                audioRenderer,
+                viewPort);
+
+        nifty = niftyDisplay.getNifty();
+        nifty.fromXml("interfaces/hud/controlsLayout.xml", "controls", this);
+        guiViewPort.addProcessor(niftyDisplay);
+
+        //Setup playbar to increase width depending on time of the animation
+        playedPanel = nifty.getCurrentScreen().findElementById("playedBar");
+        playPanel = nifty.getCurrentScreen().findElementById("playBar");
+        maxWidth = playPanel.getWidth();
+        System.out.println("maxWidth: " + maxWidth);
+    }
+
     private void computeInitialQuaternions() {
         // Compose two rotations:
         // First, rotate the rendered model to face inside the screen (negative z)
@@ -257,8 +346,8 @@ public class MainStickman extends SimpleApplication {
         terrainGeometry.setShadowMode(ShadowMode.Receive);
 
         rootNode.attachChild(terrainGeometry);
-        
-        
+
+
     }
 
     private void setSunLightAndShadow() {
@@ -289,21 +378,21 @@ public class MainStickman extends SimpleApplication {
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
-        
+
         viewPort.setBackgroundColor(ColorRGBA.White);
 
     }
-    
-    private void setAmbientLightAndShadow(){
+
+    private void setAmbientLightAndShadow() {
         AmbientLight light = new AmbientLight();
         light.setColor(ColorRGBA.White.mult(0.3f));
         rootNode.addLight(light);
-        
+
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
         sun.setDirection(new Vector3f(-.5f, -.5f, -.5f).normalizeLocal());
         rootNode.addLight(sun);
-        
+
         final int SHADOWMAP_SIZE = 512;
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 3);
         dlsr.setLight(sun);
@@ -316,9 +405,9 @@ public class MainStickman extends SimpleApplication {
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
     }
-    
-    private void setSunLightsAndShadows(){
-        
+
+    private void setSunLightsAndShadows() {
+
         //Add light to the scene
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
@@ -346,7 +435,7 @@ public class MainStickman extends SimpleApplication {
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
-        
+
         DirectionalLightShadowRenderer dlsr2 = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 3);
         dlsr2.setLight(sun2);
         viewPort.addProcessor(dlsr2);
@@ -357,9 +446,63 @@ public class MainStickman extends SimpleApplication {
         FilterPostProcessor fpp2 = new FilterPostProcessor(assetManager);
         fpp2.addFilter(dlsf2);
         viewPort.addProcessor(fpp2);
-        
+
     }
 
-    
+    //Executed on click of the Play/Pause button
+    public void play() {
+        if (isRunning) {
+            isRunning = false;
+            NiftyImage image = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "interfaces/hud/play-button.png", false);
+            Element niftyElement = nifty.getCurrentScreen().findElementByName("button");
+            niftyElement.getRenderer(ImageRenderer.class).setImage(image);
+            applicationEndTime = System.currentTimeMillis();
+            System.out.println("Pause - Time: " + applicationEndTime);
+            System.out.println("T exec: " + (applicationEndTime - applicationStartTime));
+            //headBone.setUserControl(paused);
+        } else {
+            isRunning = true;
+            NiftyImage image = nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "interfaces/hud/pause-button.png", false);
+            Element niftyElement = nifty.getCurrentScreen().findElementByName("button");
+            niftyElement.getRenderer(ImageRenderer.class).setImage(image);
+            applicationStartTime = System.currentTimeMillis();
 
+            System.out.println("Play - Time: " + applicationStartTime);
+        }
+    }
+
+    //Executed on click on the play bar
+    public void clickBar(int x, int y) {
+        int panelPosX = playPanel.getX();
+        int relX = x - panelPosX;
+        int xI = dataKeysetSize * relX / maxWidth;
+        startTime = (Float) dataMap.keySet().toArray()[xI];
+        animationIndex = xI;
+        System.out.println("starttime: " + startTime);
+    }
+
+    //Executed on scale speed button
+    public void scaleSpeed() {
+        speedIndex = (speedIndex + 1) % speedFactors.length;
+        animationSpeed = speedFactors[speedIndex];
+        Element niftyElement = nifty.getCurrentScreen().findElementById("speedText");
+        niftyElement.getRenderer(TextRenderer.class).setText("x" + animationSpeed);
+        System.out.println("Speed: " + animationSpeed);
+    }
+
+
+    @Override
+    public void bind(@Nonnull Nifty nifty, @Nonnull Screen screen) {
+
+    }
+
+    @Override
+    public void onStartScreen() {
+
+    }
+
+    @Override
+    public void onEndScreen() {
+
+    }
 }
