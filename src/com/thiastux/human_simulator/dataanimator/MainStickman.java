@@ -24,6 +24,7 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
+import com.thiastux.human_simulator.Utils;
 import com.thiastux.human_simulator.model.Const;
 import com.thiastux.human_simulator.model.Stickman;
 import de.lessvoid.nifty.Nifty;
@@ -246,21 +247,10 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     }
 
     private void computeInitialQuaternions() {
-        // Compose two rotations:
-        // First, rotate the rendered model to face inside the screen (negative z)
-        // Then, rotate the rendered model to have the torso horizontal (facing downwards, leg facing north)
+        //Prerotation quaternion
         preRot = new Quaternion().fromAngles((float) Math.toRadians(90), 0f, 0f);
 
-        String print = String.format("qPreRot: %.1f %.1f %.1f %.1f", preRot.getW(), preRot.getX(), preRot.getY(), preRot.getZ());
-        System.out.println(print + "    ");
-
-        qAlignArmR = new Quaternion().fromAngles(0f, 0f, (float) Math.toRadians(90));
-        print = String.format("qRArmRot: %.1f %.1f %.1f %.1f", qAlignArmR.getW(), qAlignArmR.getX(), qAlignArmR.getY(), qAlignArmR.getZ());
-        System.out.println(print + "    ");
-
-        qAlignArmL = new Quaternion().fromAngles(0f, 0f, (float) Math.toRadians(-90));
-        print = String.format("qLArmRot: %.1f %.1f %.1f %.1f", qAlignArmL.getW(), qAlignArmL.getX(), qAlignArmL.getY(), qAlignArmL.getZ());
-        System.out.println(print + "    ");
+        System.out.println("preRot" + Utils.quatToString(preRot));
 
         for (int i = 0; i < 12; i++) {
             previousQuaternions[i] = new Quaternion();
