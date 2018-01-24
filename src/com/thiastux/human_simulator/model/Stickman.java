@@ -9,13 +9,14 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.Sphere;
+
 import java.util.HashMap;
 
 /**
@@ -43,6 +44,9 @@ public class Stickman {
     public final float LARM_LENGTH = 3f;
     public final float UARM_RADIUS = 0.4f;
     public final float LARM_RADIUS = 0.35f;
+    private final float HAND_WIDTH = 0.4f;
+    private final float HAND_LENGTH = 0.6f;
+    private final float HAND_THICKNESS = 0.1f;
     public final float SHOULDER_RADIUS = 6.5f;
     public final float HEAD_RADIUS = 1f;
     public final float EYE_RADIUS = 0.08f;
@@ -189,6 +193,50 @@ public class Stickman {
         mat.setColor("Diffuse", ColorRGBA.Orange);
         lLArmGeometry.setMaterial(mat);
 
+        /**
+         * Hands
+         */
+        //Right wrist
+        Sphere rWristMesh = new Sphere(50, 50, LARM_RADIUS);
+        Geometry rWristGeometry = new Geometry("Box", rWristMesh);
+        mat = new Material(assetManager,
+                "Common/MatDefs/Light/Lighting.j3md");
+        mat.setBoolean("UseMaterialColors", true);
+        mat.setColor("Ambient", ColorRGBA.Green);
+        mat.setColor("Diffuse", ColorRGBA.Green);
+        rWristGeometry.setMaterial(mat);
+
+        //Right hand
+        Box rHandMesh = new Box(HAND_THICKNESS, HAND_LENGTH, HAND_WIDTH);
+        Geometry rHandGeometry = new Geometry("rHandGeometry", rHandMesh);
+        mat = new Material(assetManager,
+                "Common/MatDefs/Light/Lighting.j3md");
+        mat.setBoolean("UseMaterialColors", true);
+        mat.setColor("Ambient", ColorRGBA.Green);
+        mat.setColor("Diffuse", ColorRGBA.Green);
+        rHandGeometry.setMaterial(mat);
+
+
+        //Left wrist
+        Sphere lWristMesh = new Sphere(50, 50, LARM_RADIUS);
+        Geometry lWristGeometry = new Geometry("Box", lWristMesh);
+        mat = new Material(assetManager,
+                "Common/MatDefs/Light/Lighting.j3md");
+        mat.setBoolean("UseMaterialColors", true);
+        mat.setColor("Ambient", ColorRGBA.Red);
+        mat.setColor("Diffuse", ColorRGBA.Red);
+        lWristGeometry.setMaterial(mat);
+
+        //Left hand
+        Box lHandMesh = new Box(HAND_THICKNESS, HAND_LENGTH, HAND_WIDTH);
+        Geometry lHandGeometry = new Geometry("Box", lHandMesh);
+        mat = new Material(assetManager,
+                "Common/MatDefs/Light/Lighting.j3md");
+        mat.setBoolean("UseMaterialColors", true);
+        mat.setColor("Ambient", ColorRGBA.Red);
+        mat.setColor("Diffuse", ColorRGBA.Red);
+        lHandGeometry.setMaterial(mat);
+
         //Left Elbow
         Sphere lElbowMesh = new Sphere(50, 50, LARM_RADIUS);
         Geometry lElbowGeometry = new Geometry("Box", lElbowMesh);
@@ -283,8 +331,10 @@ public class Stickman {
         Node shouldersNode = new Node("Shoulders");
         Node rightShoulderNode = new Node("RightShoulder");
         Node rightElbowNode = new Node("RightElbow");
+        Node rightWristNode = new Node("RightWrist");
         Node leftShoulderNode = new Node("LeftShoulder");
         Node leftElbowNode = new Node("LeftElbow");
+        Node leftWristNode = new Node("LeftWrist");
         Node headNode = new Node("Head");
         Node eyesNode = new Node("Eyes");
         Node pelvisNode = new Node("Pelvis");
@@ -298,8 +348,10 @@ public class Stickman {
         headNode.attachChild(eyesNode);
         shouldersNode.attachChild(rightShoulderNode);
         rightShoulderNode.attachChild(rightElbowNode);
+        rightElbowNode.attachChild(rightWristNode);
         shouldersNode.attachChild(leftShoulderNode);
         leftShoulderNode.attachChild(leftElbowNode);
+        leftElbowNode.attachChild(leftWristNode);
         
         pelvisNode.attachChild(rightHipNode);
         rightHipNode.attachChild(rightKneeNode);
@@ -332,6 +384,13 @@ public class Stickman {
         rightElbowNode.setLocalTranslation(0, -UARM_LENGTH, 0);
         rLArmGeometry.setLocalTranslation(0, -LARM_LENGTH/2, 0);
         skeletonMap.put(3, rightElbowNode);
+
+        rightWristNode.attachChild(rWristGeometry);
+        rightWristNode.attachChild(rHandGeometry);
+        rightWristNode.setLocalTranslation(0, -LARM_LENGTH, 0);
+        rHandGeometry.setLocalTranslation(0, -HAND_LENGTH, 0);
+        skeletonMap.put(4, rightWristNode);
+        skeletonMap.put(13, rHandGeometry);
         
         leftShoulderNode.attachChild(lShoulderGeometry);
         leftShoulderNode.attachChild(lUArmGeometry);
@@ -344,6 +403,12 @@ public class Stickman {
         leftElbowNode.setLocalTranslation(0, -UARM_LENGTH, 0);
         lLArmGeometry.setLocalTranslation(0, -LARM_LENGTH/2, 0);
         skeletonMap.put(6, leftElbowNode);
+
+        leftWristNode.attachChild(lWristGeometry);
+        leftWristNode.attachChild(lHandGeometry);
+        leftWristNode.setLocalTranslation(0, -LARM_LENGTH, 0);
+        lHandGeometry.setLocalTranslation(0, -HAND_LENGTH, 0);
+        skeletonMap.put(7, leftWristNode);
         
         pelvisNode.attachChild(pelvisGeometry);
         pelvisNode.setLocalTranslation(0, -PELVIS_HEIGHT/2, 0);
@@ -380,6 +445,13 @@ public class Stickman {
     public void updateModelBonePosition(Quaternion animationQuaternion, int boneIndex) {
         Spatial bone = skeletonMap.get(boneIndex);
         bone.setLocalRotation(animationQuaternion);
+    }
+
+    public void resetPositions(){
+        for(int i = 0; i<12; i++){
+            Spatial bone = skeletonMap.get(i);
+            bone.setLocalRotation(new Quaternion());
+        }
     }
     
     public void rotateLegs(Quaternion torsoQuaternion){

@@ -5,10 +5,6 @@
  */
 package com.thiastux.human_simulator.demo;
 
-import com.jme3.system.AppSettings;
-import com.thiastux.human_simulator.*;
-import com.thiastux.human_simulator.model.Stickman;
-import com.thiastux.human_simulator.model.Const;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.ChaseCamera;
 import com.jme3.light.AmbientLight;
@@ -26,10 +22,12 @@ import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.thiastux.human_simulator.model.Const;
+import com.thiastux.human_simulator.model.Stickman;
+
 import java.util.HashMap;
 
 /**
- *
  * @author mathias
  */
 public class MainStickman extends SimpleApplication {
@@ -153,16 +151,16 @@ public class MainStickman extends SimpleApplication {
                 outputQuat.getZ(),
                 outputQuat.getY(),
                 outputQuat.getW());
-        
+
         previousQuaternions[i] = outputQuat.normalizeLocal();
-        
+
         outputQuat = conjugate(getPrevLimbQuaternion(i)).mult(outputQuat);
 
         outputQuat = outputQuat.normalizeLocal();
 
         return outputQuat;
     }
-    
+
     private void computeInitialQuaternions() {
         // Compose two rotations:
         // First, rotate the rendered model to face inside the screen (negative z)
@@ -264,8 +262,8 @@ public class MainStickman extends SimpleApplication {
         terrainGeometry.setShadowMode(ShadowMode.Receive);
 
         rootNode.attachChild(terrainGeometry);
-        
-        
+
+
     }
 
     private void setSunLightAndShadow() {
@@ -296,21 +294,21 @@ public class MainStickman extends SimpleApplication {
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
-        
+
         viewPort.setBackgroundColor(ColorRGBA.White);
 
     }
-    
-    private void setAmbientLightAndShadow(){
+
+    private void setAmbientLightAndShadow() {
         AmbientLight light = new AmbientLight();
         light.setColor(ColorRGBA.White.mult(0.3f));
         rootNode.addLight(light);
-        
+
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
         sun.setDirection(new Vector3f(-.5f, -.5f, -.5f).normalizeLocal());
         rootNode.addLight(sun);
-        
+
         final int SHADOWMAP_SIZE = 512;
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 3);
         dlsr.setLight(sun);
@@ -323,9 +321,9 @@ public class MainStickman extends SimpleApplication {
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
     }
-    
-    private void setSunLightsAndShadows(){
-        
+
+    private void setSunLightsAndShadows() {
+
         //Add light to the scene
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
@@ -353,7 +351,7 @@ public class MainStickman extends SimpleApplication {
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
-        
+
         DirectionalLightShadowRenderer dlsr2 = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 3);
         dlsr2.setLight(sun2);
         viewPort.addProcessor(dlsr2);
@@ -364,9 +362,8 @@ public class MainStickman extends SimpleApplication {
         FilterPostProcessor fpp2 = new FilterPostProcessor(assetManager);
         fpp2.addFilter(dlsf2);
         viewPort.addProcessor(fpp2);
-        
+
     }
 
-    
 
 }
