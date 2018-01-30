@@ -25,6 +25,7 @@ import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.thiastux.human_simulator.model.Const;
 import com.thiastux.human_simulator.model.Stickman;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -48,7 +49,7 @@ public class MainStickman extends SimpleApplication {
         app.start();
     }
 
-    private TCPDataClient tcpDataClient;
+    private DataLoader dataLoader;
     private Quaternion[] animationQuaternions;
     private HashMap<Integer, Spatial> skeletonMap = new HashMap<>();
     private Stickman stickman;
@@ -61,12 +62,18 @@ public class MainStickman extends SimpleApplication {
     private Quaternion qAlignArmR;
     private Quaternion qAlignArmL;
 
-    public MainStickman() {
+    private MainStickman() {
         super();
     }
 
-    public MainStickman(String[] args) {
-        tcpDataClient = new TCPDataClient(this, args);
+    private MainStickman(String[] args) {
+        if (args[0].equals("-network")) {
+            args = Arrays.copyOfRange(args, 1, args.length);
+            dataLoader = new TCPDataLoader(this, args);
+        } else if (args[0].equals("-local")) {
+            args = new String[]{"/dev/rfcomm0", "/dev/rfcomm1", "/dev/rfcomm2", "/dev/rfcomm3"};
+            dataLoader = new RFCommDataLoader(this, args);
+        }
     }
 
     @Override
@@ -96,7 +103,7 @@ public class MainStickman extends SimpleApplication {
         computeInitialQuaternions();
 
         if (!DEBUG) {
-            tcpDataClient.startExecution();
+            dataLoader.startExecution();
         }
 
     }
@@ -115,14 +122,14 @@ public class MainStickman extends SimpleApplication {
     @Override
     public void stop() {
         if (!DEBUG) {
-            tcpDataClient.stopExecution();
+            dataLoader.stopExecution();
         }
         System.out.println("\nApplication ended");
         super.stop();
     }
 
     private void getData() {
-        animationQuaternions = tcpDataClient.getData();
+        animationQuaternions = dataLoader.getData();
     }
 
     private void animateModel() {

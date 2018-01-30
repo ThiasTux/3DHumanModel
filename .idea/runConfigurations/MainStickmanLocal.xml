@@ -1,14 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="MainStickman" type="Application" factoryName="Application" singleton="true" nameIsGenerated="true">
-    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-      <pattern>
-        <option name="PATTERN" value="com.thiastux.human_simulator.demo.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-    </extension>
+  <configuration default="false" name="MainStickmanLocal" type="Application" factoryName="Application" singleton="true">
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <option name="MAIN_CLASS_NAME" value="com.thiastux.human_simulator.demo.MainStickman" />
     <option name="VM_PARAMETERS" value="" />
-    <option name="PROGRAM_PARAMETERS" value="127.0.0.1 9432 -tor 3 4 5 6 -rua 8 9 10 11 -rla 13 14 15 16" />
+    <option name="PROGRAM_PARAMETERS" value="-local" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" />

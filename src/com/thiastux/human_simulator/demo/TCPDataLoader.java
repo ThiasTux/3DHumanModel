@@ -5,10 +5,10 @@
  */
 package com.thiastux.human_simulator.demo;
 
-import com.thiastux.human_simulator.model.Const;
 import com.jme3.math.Quaternion;
 import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import com.thiastux.human_simulator.Main;
+import com.thiastux.human_simulator.model.Const;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author mathias
  */
-public class TCPDataClient extends Thread {
+public class TCPDataLoader extends Thread implements DataLoader {
 
     private Object lock;
     private int tcpPort;
@@ -33,7 +33,7 @@ public class TCPDataClient extends Thread {
     private Quaternion[] priorQuaternions;
     private boolean isExecuted = false;
 
-    public TCPDataClient(Object lock, String[] args) {
+    public TCPDataLoader(Object lock, String[] args) {
         this.lock = lock;
         animationPacket = new Quaternion[12];
         initializeSocket(args[0], args[1]);
@@ -75,14 +75,14 @@ public class TCPDataClient extends Thread {
                     }
                 }
             } catch (IOException ex) {
-                Logger.getLogger(TCPDataClient.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(TCPDataLoader.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         try {
             inputBuffer.close();
             socket.close();
         } catch (IOException ex) {
-            Logger.getLogger(TCPDataClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TCPDataLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -140,7 +140,7 @@ public class TCPDataClient extends Thread {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
             System.exit(-1);
         } catch (WrongNumberArgsException | NumberFormatException e) {
-            Logger.getLogger(TCPDataClient.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(TCPDataLoader.class.getName()).log(Level.SEVERE, null, e);
             System.exit(-1);
         }
     }
@@ -152,7 +152,7 @@ public class TCPDataClient extends Thread {
                     new InputStreamReader(
                             socket.getInputStream()));
         } catch (IOException ex) {
-            Logger.getLogger(TCPDataClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TCPDataLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

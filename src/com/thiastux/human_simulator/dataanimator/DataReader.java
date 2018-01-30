@@ -3,7 +3,6 @@ package com.thiastux.human_simulator.dataanimator;
 import com.jme3.math.Quaternion;
 import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import com.thiastux.human_simulator.Main;
-import com.thiastux.human_simulator.demo.TCPDataClient;
 import com.thiastux.human_simulator.model.Const;
 
 import java.io.BufferedReader;
@@ -112,7 +111,7 @@ public class DataReader {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
             System.exit(-1);
         } catch (WrongNumberArgsException | NumberFormatException e) {
-            Logger.getLogger(TCPDataClient.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(DataReader.class.getName()).log(Level.SEVERE, null, e);
             System.exit(-1);
         }
     }
