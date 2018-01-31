@@ -38,16 +38,21 @@ public class RFCommDataLoader extends Thread implements DataLoader {
                         lines[i] = inputReaders[i].readLine();
                 }
                 for (int i = 0; i < lines.length; i++) {
-                    String[] values = lines[i].split("\\s+");
-                    int len = values.length;
-                    float qw = Float.parseFloat(values[len - 4]);
-                    float qx = Float.parseFloat(values[len - 3]);
-                    float qy = Float.parseFloat(values[len - 2]);
-                    float qz = Float.parseFloat(values[len - 1]);
-                    tmpQuaternion[i] = new Quaternion(qx / 1000.0f, qy / 1000.0f, qz / 1000.0f, qw / 1000.0f);
-                    synchronized (lock) {
-                        Const.animationStart = true;
-                        animationPacket = tmpQuaternion;
+                    if (lines[i]!=null) {
+                        String[] values = lines[i].split("\\s+");
+                        try{
+                            float qw = Float.parseFloat(values[2]);
+                            float qx = Float.parseFloat(values[3]);
+                            float qy = Float.parseFloat(values[4]);
+                            float qz = Float.parseFloat(values[5]);
+                            tmpQuaternion[i] = new Quaternion(qx / 1000.0f, qy / 1000.0f, qz / 1000.0f, qw / 1000.0f);
+                            synchronized (lock) {
+                                Const.animationStart = true;
+                                animationPacket = tmpQuaternion;
+                            }
+                        } catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
+
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -66,6 +71,8 @@ public class RFCommDataLoader extends Thread implements DataLoader {
                 inputReader.close();
             } catch (IOException ex) {
                 System.out.println("Closing socket error: " + ex.getMessage());
+            } catch (NullPointerException ignored){
+
             }
         }
     }
