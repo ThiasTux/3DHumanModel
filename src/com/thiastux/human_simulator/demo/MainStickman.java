@@ -71,8 +71,8 @@ public class MainStickman extends SimpleApplication {
             args = Arrays.copyOfRange(args, 1, args.length);
             dataLoader = new TCPDataLoader(this, args);
         } else if (args[0].equals("-local")) {
-            args = new String[]{"/dev/rfcomm0", "/dev/rfcomm1", "/dev/rfcomm2", "/dev/rfcomm3"};
-            dataLoader = new RFCommDataLoader(this, args);
+            args = Arrays.copyOfRange(args, 1, args.length);
+            dataLoader = new RFCommDataSync(this, args);
         }
     }
 

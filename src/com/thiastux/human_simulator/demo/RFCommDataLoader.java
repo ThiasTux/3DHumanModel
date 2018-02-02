@@ -1,94 +1,70 @@
 package com.thiastux.human_simulator.demo;
 
 import com.jme3.math.Quaternion;
-import com.thiastux.human_simulator.model.Const;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-public class RFCommDataLoader extends Thread implements DataLoader {
+public class RFCommDataLoader extends Thread {
 
+    private BufferedReader inputReader;
+    private volatile Quaternion readQuat = new Quaternion();
+    private boolean reading;
+    private int[] columnsValue;
     private final Object lock;
-    private String[] ports;
-    private BufferedReader[] inputReaders = new BufferedReader[12];
-    private Quaternion[] animationPacket;
-    private boolean isExecuted = false;
 
-    RFCommDataLoader(Object lock, String[] ports) {
+    RFCommDataLoader(Object lock, String port, int[] columnsValue) {
         this.lock = lock;
-        this.ports = ports;
-        animationPacket = new Quaternion[12];
-        for (int i = 0; i < ports.length; i++) {
-            try {
-                inputReaders[i] = new BufferedReader(new InputStreamReader(new FileInputStream(ports[i])));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+        this.columnsValue = columnsValue;
+        try {
+            inputReader = new BufferedReader(new InputStreamReader(new FileInputStream(port)));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void run() {
-        String[] lines = new String[inputReaders.length];
-        Quaternion[] tmpQuaternion = new Quaternion[12];
-
-        while (isExecuted) {
+        while (reading) {
             try {
-                for (int i = 0; i < inputReaders.length; i++) {
-                    if (inputReaders[i]!=null)
-                        lines[i] = inputReaders[i].readLine();
-                }
-                for (int i = 0; i < lines.length; i++) {
-                    if (lines[i]!=null) {
-                        String[] values = lines[i].split("\\s+");
-                        try{
-                            float qw = Float.parseFloat(values[2]);
-                            float qx = Float.parseFloat(values[3]);
-                            float qy = Float.parseFloat(values[4]);
-                            float qz = Float.parseFloat(values[5]);
-                            tmpQuaternion[i] = new Quaternion(qx / 1000.0f, qy / 1000.0f, qz / 1000.0f, qw / 1000.0f);
-                            synchronized (lock) {
-                                Const.animationStart = true;
-                                animationPacket = tmpQuaternion;
-                            }
-                        } catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
-
-                        }
-                    }
-                }
+                String[] values = inputReader.readLine().split("\\s+");
+                float qw = Float.parseFloat(values[columnsValue[0]]);
+                float qx = Float.parseFloat(values[columnsValue[1]]);
+                float qy = Float.parseFloat(values[columnsValue[2]]);
+                float qz = Float.parseFloat(values[columnsValue[3]]);
+                readQuat = new Quaternion(qx / 1000.0f, qy / 1000.0f, qz / 1000.0f, qw / 1000.0f);
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void stopExecution() {
-        synchronized (lock) {
-            isExecuted = false;
-        }
-        for (BufferedReader inputReader : inputReaders) {
-            try {
-                inputReader.close();
-            } catch (IOException ex) {
-                System.out.println("Closing socket error: " + ex.getMessage());
-            } catch (NullPointerException ignored){
+            } catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
 
             }
         }
     }
 
-    @Override
-    public Quaternion[] getData() {
-        synchronized (lock) {
-            return animationPacket;
-        }
+    public Quaternion getData() {
+        return readQuat;
     }
 
-    @Override
     public void startExecution() {
         synchronized (lock) {
-            isExecuted = true;
+            reading = true;
         }
         this.start();
     }
+
+    public void stopExecution() {
+        synchronized (lock) {
+            reading = false;
+        }
+        try {
+            inputReader.close();
+        } catch (IOException ex) {
+            System.out.println("Closing socket error: " + ex.getMessage());
+        } catch (NullPointerException ignored) {
+
+        }
+    }
+
 }
