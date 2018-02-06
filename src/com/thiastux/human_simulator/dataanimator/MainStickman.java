@@ -26,7 +26,7 @@ import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
 import com.thiastux.human_simulator.Utils;
 import com.thiastux.human_simulator.model.Const;
-import com.thiastux.human_simulator.model.Stickman;
+import com.thiastux.human_simulator.model.Stickman3D;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
@@ -53,7 +53,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     private DataReader dataReader;
     private Quaternion[] animationQuaternions;
     private HashMap<Integer, Spatial> skeletonMap = new HashMap<>();
-    private Stickman stickman;
+    private Stickman3D stickman;
     private Geometry terrainGeometry;
 
     private final float TERRAIN_WIDTH = 50f;
@@ -318,7 +318,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     }
 
     private void createHumanModel() {
-        stickman = new Stickman(rootNode, skeletonMap, assetManager);
+        stickman = new Stickman3D(rootNode, skeletonMap, assetManager);
     }
 
     private void loadTerrain() {

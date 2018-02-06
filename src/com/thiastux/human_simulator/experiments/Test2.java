@@ -23,11 +23,12 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.thiastux.human_simulator.model.Const;
-import com.thiastux.human_simulator.model.Stickman;
+import com.thiastux.human_simulator.model.Stickman3D;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ import java.util.List;
  */
 public class Test2 extends SimpleApplication implements ScreenController {
 
-    private Stickman stickman;
+    private Stickman3D stickman;
     private DataLoader dataLoader;
     private LogService logService;
     private Quaternion[] animationQuaternions = new Quaternion[12];
@@ -236,7 +237,7 @@ public class Test2 extends SimpleApplication implements ScreenController {
     }
 
     private void createHumanModel() {
-        stickman = new Stickman(rootNode, skeletonMap, assetManager);
+        stickman = new Stickman3D(rootNode, skeletonMap, assetManager);
     }
 
     private void loadTerrain() {

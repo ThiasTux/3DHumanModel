@@ -5,7 +5,6 @@
  */
 package com.thiastux.human_simulator.experiments;
 
-import com.jme3.app.LegacyApplication;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
@@ -26,7 +25,8 @@ import com.jme3.scene.shape.Quad;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.thiastux.human_simulator.model.Const;
-import com.thiastux.human_simulator.model.Stickman;
+import com.thiastux.human_simulator.model.Stickman3D;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class Test1 extends SimpleApplication {
 
-    private Stickman stickman;
+    private Stickman3D stickman;
     private DataLoader dataLoader;
     private LogService logService;
     private Test1Entry animationPacket = new Test1Entry();
@@ -227,7 +227,7 @@ public class Test1 extends SimpleApplication {
     }
 
     private void createHumanModel() {
-        stickman = new Stickman(rootNode, skeletonMap, assetManager);
+        stickman = new Stickman3D(rootNode, skeletonMap, assetManager);
     }
 
     private void loadTerrain() {

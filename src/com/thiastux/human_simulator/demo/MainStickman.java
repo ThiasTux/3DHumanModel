@@ -24,6 +24,7 @@ import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.thiastux.human_simulator.model.Const;
 import com.thiastux.human_simulator.model.Stickman;
+import com.thiastux.human_simulator.model.Stickman3D;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -251,7 +252,7 @@ public class MainStickman extends SimpleApplication {
     }
 
     private void createHumanModel() {
-        stickman = new Stickman(rootNode, skeletonMap, assetManager);
+        stickman = new Stickman3D(rootNode, skeletonMap, assetManager);
     }
 
     private void loadTerrain() {
