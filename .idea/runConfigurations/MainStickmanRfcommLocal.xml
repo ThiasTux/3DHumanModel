@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="MainStickmanLocal" type="Application" factoryName="Application" singleton="true">
+  <configuration default="false" name="MainStickmanRfcommLocal" type="Application" factoryName="Application" singleton="true">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <option name="MAIN_CLASS_NAME" value="com.thiastux.human_simulator.demo.MainStickman" />
     <option name="VM_PARAMETERS" value="" />

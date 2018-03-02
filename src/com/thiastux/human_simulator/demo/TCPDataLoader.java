@@ -66,9 +66,9 @@ public class TCPDataLoader extends Thread implements DataLoader {
                                 qz = Float.parseFloat(values[columnValues[3].intValue()]);
                                 synchronized (lock) {
                                     Const.animationStart = true;
-                                    animationPacket[i] = new Quaternion(qx / 1000.0f, qy / 1000.0f, qz / 1000.0f, qw / 1000.0f);
+                                    animationPacket[i] = new Quaternion(qx, qy, qz, qw);
                                 }
-                            } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+                            } catch (NullPointerException | ArrayIndexOutOfBoundsException | NumberFormatException e) {
                                 animationPacket[i] = null;
                             }
                         }

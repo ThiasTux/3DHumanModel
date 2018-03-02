@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class DataReader {
 
     private HashMap<Integer, Integer[]> columnIndexMap;
-    private TreeMap<Float, Quaternion[]> dataMap;
+    private TreeMap<Double, Quaternion[]> dataMap;
     private Quaternion[] priorQuaternions;
     private boolean isExecuted = false;
     private String inputPath;
@@ -32,20 +32,20 @@ public class DataReader {
         dataMap = new TreeMap<>();
     }
 
-    TreeMap<Float, Quaternion[]> loadData() {
+    TreeMap<Double, Quaternion[]> loadData() {
 
         float qw;
         float qx;
         float qy;
         float qz;
-        float time;
+        double time;
 
         try {
-            List<String> dataStringList = Files.readAllLines(Paths.get(inputPath + "joined_data_cleaned.txt"));
+            List<String> dataStringList = Files.readAllLines(Paths.get(inputPath));
             for (String line : dataStringList) {
                 String[] lineSplit = line.split(" ");
                 Quaternion[] quaternions = new Quaternion[12];
-                time = Float.parseFloat(lineSplit[0]);
+                time = Double.parseDouble(lineSplit[0]);
                 for (int i = 0; i < 12; i++) {
                     try {
                         Integer[] columnValues = columnIndexMap.get(i);
@@ -53,7 +53,7 @@ public class DataReader {
                         qx = Float.parseFloat(lineSplit[columnValues[1]]);
                         qy = Float.parseFloat(lineSplit[columnValues[2]]);
                         qz = Float.parseFloat(lineSplit[columnValues[3]]);
-                        quaternions[i] = new Quaternion(qx /1000.0f, qy/1000.0f, qz/1000.0f, qw/1000.0f);
+                        quaternions[i] = new Quaternion(qx, qy, qz, qw);
                     } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
                         quaternions[i] = null;
                     }

@@ -67,12 +67,12 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     boolean isRunning = false;
     long applicationStartTime;
     long applicationEndTime;
-    Float startTime = 0f;
-    Float currentTime = 0f;
+    Double startTime = 0.0;
+    Double currentTime = 0.0;
     double animationSpeed = 1;
     int speedIndex = 1;
     double[] speedFactors = {0.5, 1, 2, 4, 8};
-    private TreeMap<Float, Quaternion[]> dataMap;
+    private TreeMap<Double, Quaternion[]> dataMap;
     private int samplingFreq = 500;
     private float elapsedTime = 0.0f;
     //Gui and controls
@@ -149,9 +149,10 @@ public class MainStickman extends SimpleApplication implements ScreenController 
             startTime = dataMap.firstKey();
         if (isRunning) {
             elapsedTime += (float) (animationSpeed * tpf);
-            if (elapsedTime >= (1 / samplingFreq))
+            if (elapsedTime >= 1/samplingFreq) {
                 animateModel(elapsedTime);
-            elapsedTime = .0f;
+                elapsedTime = .0f;
+            }
         }
     }
 
@@ -165,9 +166,9 @@ public class MainStickman extends SimpleApplication implements ScreenController 
 
         if (animationIndex < dataKeysetSize - 1) {
 
-            currentTime = startTime + tmpElapsedTime;
+            currentTime = startTime + tmpElapsedTime*1000;
 
-            float lastKey = dataMap.subMap(startTime, currentTime).lastKey();
+            double lastKey = dataMap.subMap(startTime, currentTime).lastKey();
             if (lastKey != startTime) {
 
                 int size = dataMap.subMap(startTime, currentTime).size();
@@ -466,7 +467,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
         int panelPosX = playPanel.getX();
         int relX = x - panelPosX;
         int xI = dataKeysetSize * relX / maxWidth;
-        startTime = (Float) dataMap.keySet().toArray()[xI];
+        startTime = (Double) dataMap.keySet().toArray()[xI];
         animationIndex = xI;
         System.out.println("starttime: " + startTime);
     }
