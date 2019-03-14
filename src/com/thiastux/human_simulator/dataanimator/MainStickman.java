@@ -45,10 +45,11 @@ import java.util.TreeMap;
 public class MainStickman extends SimpleApplication implements ScreenController {
 
     private static boolean DEBUG = false;
-    Element playedPanel;
-    Element remainingPanel;
-    Element playPanel;
-    int maxWidth;
+    private static boolean XSens = false;
+
+    private Element playedPanel;
+    private Element playPanel;
+    private int maxWidth;
 
     private DataReader dataReader;
     private Quaternion[] animationQuaternions;
@@ -73,7 +74,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     int speedIndex = 1;
     double[] speedFactors = {0.5, 1, 2, 4, 8};
     private TreeMap<Double, Quaternion[]> dataMap;
-    private int samplingFreq = 100;
+    private int samplingFreq = 500;
     private float elapsedTime = 0.0f;
     //Gui and controls
     private Nifty nifty;
@@ -101,7 +102,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
 
         AppSettings appSettings = new AppSettings(true);
         appSettings.setFrameRate(60);
-        appSettings.setResolution(1920, 1080);
+        appSettings.setResolution(1280,800);
 
         app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
@@ -211,18 +212,28 @@ public class MainStickman extends SimpleApplication implements ScreenController 
         }
 
         //Normalize quaternion to adjust lost of precision using mG.
-        Quaternion outputQuat = animationQuaternions[i].normalizeLocal();
+        Quaternion outputQuat = animationQuaternions[i];
+
+        if(XSens){
+            outputQuat = new Quaternion(outputQuat.getY(), outputQuat.getZ(), outputQuat.getX(), outputQuat.getW());
+            if (i == 2 || i == 3 || i == 4) {
+                outputQuat = outputQuat.mult(qAlignArmR);
+            }
+            if (i == 5 || i == 6 || i == 7) {
+                outputQuat = outputQuat.mult(qAlignArmL);
+            }
+        }
 
         outputQuat = outputQuat.mult(preRot);
-        outputQuat = new Quaternion(-outputQuat.getX(),
-                outputQuat.getZ(),
-                outputQuat.getY(),
-                outputQuat.getW());
+        if(!XSens) {
+            outputQuat = new Quaternion(-outputQuat.getX(),
+                    outputQuat.getZ(),
+                    outputQuat.getY(),
+                    outputQuat.getW());
+        }
 
         previousQuaternions[i] = outputQuat.normalizeLocal();
-
         outputQuat = conjugate(getPrevLimbQuaternion(i)).mult(outputQuat);
-
         outputQuat = outputQuat.normalizeLocal();
 
         return outputQuat;
@@ -247,8 +258,19 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     }
 
     private void computeInitialQuaternions() {
-        //Prerotation quaternion
-        preRot = new Quaternion().fromAngles((float) Math.toRadians(90), 0f, 0f);
+        if(XSens){
+            // Compose two rotations:
+            // First, rotate the rendered model to face inside the screen (negative z)
+            // Then, rotate the rendered model to have the torso horizontal (facing downwards, leg facing north)
+            Quaternion quat1 = new Quaternion().fromAngles((float) Math.toRadians(-90), 0f, 0f);
+            Quaternion quat2 = new Quaternion().fromAngles(0f, (float) Math.toRadians(180), 0f);
+            preRot = quat1.mult(quat2);
+            qAlignArmR = new Quaternion().fromAngles(0f, 0f, (float) Math.toRadians(90));
+            qAlignArmL = new Quaternion().fromAngles(0f, 0f, (float) Math.toRadians(-90));
+        } else {
+            //Prerotation quaternion
+            preRot = new Quaternion().fromAngles((float) Math.toRadians(90), 0f, 0f);
+        }
 
         System.out.println("preRot" + Utils.quatToString(preRot));
 
@@ -344,12 +366,12 @@ public class MainStickman extends SimpleApplication implements ScreenController 
         //Add light to the scene
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
-        sun.setDirection(new Vector3f(.5f, -.5f, .5f).normalizeLocal());
+        sun.setDirection(new Vector3f(.5f, -.5f, -.5f).normalizeLocal());
         rootNode.addLight(sun);
 
         DirectionalLight sun2 = new DirectionalLight();
         sun2.setColor(ColorRGBA.White);
-        sun2.setDirection(new Vector3f(-.5f, .5f, -.5f).normalizeLocal());
+        sun2.setDirection(new Vector3f(-.5f, .5f, .5f).normalizeLocal());
         rootNode.addLight(sun2);
 
         rootNode.setShadowMode(ShadowMode.Off);
