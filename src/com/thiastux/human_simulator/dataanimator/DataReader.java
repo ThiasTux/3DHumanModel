@@ -1,6 +1,7 @@
 package com.thiastux.human_simulator.dataanimator;
 
 import com.jme3.math.Quaternion;
+
 import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import com.thiastux.human_simulator.Main;
 import com.thiastux.human_simulator.model.Const;
@@ -38,10 +39,11 @@ public class DataReader {
         float qx;
         float qy;
         float qz;
-        double time;
+        Double time;
 
         try {
-            List<String> dataStringList = Files.readAllLines(Paths.get(inputPath));
+            List<String> dataStringList = Files.readAllLines(Paths.get(inputPath + "merged_data_cleaned.txt"));
+            System.out.println(dataStringList.size());
             for (String line : dataStringList) {
                 String[] lineSplit = line.split(" ");
                 Quaternion[] quaternions = new Quaternion[12];

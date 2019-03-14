@@ -67,13 +67,13 @@ public class MainStickman extends SimpleApplication implements ScreenController 
     boolean isRunning = false;
     long applicationStartTime;
     long applicationEndTime;
-    Double startTime = 0.0;
-    Double currentTime = 0.0;
+    Double startTime = 0d;
+    double currentTime = 0d;
     double animationSpeed = 1;
     int speedIndex = 1;
     double[] speedFactors = {0.5, 1, 2, 4, 8};
     private TreeMap<Double, Quaternion[]> dataMap;
-    private int samplingFreq = 500;
+    private int samplingFreq = 100;
     private float elapsedTime = 0.0f;
     //Gui and controls
     private Nifty nifty;
@@ -101,7 +101,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
 
         AppSettings appSettings = new AppSettings(true);
         appSettings.setFrameRate(60);
-        appSettings.setResolution(1280,800);
+        appSettings.setResolution(1920, 1080);
 
         app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
@@ -149,10 +149,9 @@ public class MainStickman extends SimpleApplication implements ScreenController 
             startTime = dataMap.firstKey();
         if (isRunning) {
             elapsedTime += (float) (animationSpeed * tpf);
-            if (elapsedTime >= 1/samplingFreq) {
+            if (elapsedTime >= (1 / samplingFreq))
                 animateModel(elapsedTime);
-                elapsedTime = .0f;
-            }
+            elapsedTime = .0f;
         }
     }
 
@@ -166,7 +165,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
 
         if (animationIndex < dataKeysetSize - 1) {
 
-            currentTime = startTime + tmpElapsedTime*1000;
+            currentTime = startTime + tmpElapsedTime * 1000;
 
             double lastKey = dataMap.subMap(startTime, currentTime).lastKey();
             if (lastKey != startTime) {
@@ -175,7 +174,7 @@ public class MainStickman extends SimpleApplication implements ScreenController 
                 animationIndex += size;
 
                 int perc = maxWidth * animationIndex / dataKeysetSize;
-                System.out.println(perc);
+                // System.out.println(perc);
                 playedPanel.setWidth(perc);
 
                 animationQuaternions = dataMap.get(lastKey);
@@ -345,12 +344,12 @@ public class MainStickman extends SimpleApplication implements ScreenController 
         //Add light to the scene
         DirectionalLight sun = new DirectionalLight();
         sun.setColor(ColorRGBA.White);
-        sun.setDirection(new Vector3f(.5f, -.5f, -.5f).normalizeLocal());
+        sun.setDirection(new Vector3f(.5f, -.5f, .5f).normalizeLocal());
         rootNode.addLight(sun);
 
         DirectionalLight sun2 = new DirectionalLight();
         sun2.setColor(ColorRGBA.White);
-        sun2.setDirection(new Vector3f(-.5f, .5f, .5f).normalizeLocal());
+        sun2.setDirection(new Vector3f(-.5f, .5f, -.5f).normalizeLocal());
         rootNode.addLight(sun2);
 
         rootNode.setShadowMode(ShadowMode.Off);

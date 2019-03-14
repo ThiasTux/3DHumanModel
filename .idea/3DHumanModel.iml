@@ -22,5 +22,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="commons-lang3-3.4" level="project" />
+    <orderEntry type="library" name="libs" level="project" />
   </component>
 </module>

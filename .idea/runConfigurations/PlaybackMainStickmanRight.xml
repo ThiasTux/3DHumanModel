@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PlaybackMainStickmanRight" type="Application" factoryName="Application" singleton="true">
+    <option name="MAIN_CLASS_NAME" value="com.thiastux.human_simulator.dataanimator.MainStickman" />
+    <module name="3DHumanModel" />
+    <option name="PROGRAM_PARAMETERS" value="&quot;$USER_HOME$/Documents/Datasets/BeachVolleyball/20022019_110000/user1/raw/&quot; -tor 11 12 13 14 -rua 25 26 27 28 -rla 39 40 41 42 -rha 53 54 55 56" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.thiastux.human_simulator.dataanimator.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
